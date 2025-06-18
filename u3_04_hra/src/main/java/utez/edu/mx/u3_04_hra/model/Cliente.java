@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "clientes")
 @Getter
@@ -23,6 +25,7 @@ public class Cliente {
     private String correo;
 
     @OneToMany(mappedBy = "cliente")
+    @JsonIgnore
     private List<Almacen> almacenes;
 
 }

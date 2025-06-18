@@ -24,7 +24,7 @@ public class Almacen {
     private double precioVenta;
     private double precioRenta;
 
-    private String tamaño; // G, M o P
+    private String tamano; // G, M o P
 
     @ManyToOne
     @JoinColumn(name = "cede_id")

@@ -3,7 +3,11 @@ package utez.edu.mx.u3_04_hra.service.almacen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import utez.edu.mx.u3_04_hra.model.Almacen;
+import utez.edu.mx.u3_04_hra.model.Cede;
+import utez.edu.mx.u3_04_hra.model.Cliente;
 import utez.edu.mx.u3_04_hra.repository.AlmacenRepository;
+import utez.edu.mx.u3_04_hra.repository.CedeRepository;
+import utez.edu.mx.u3_04_hra.repository.ClienteRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,41 +17,60 @@ import java.util.Optional;
 public class AlmacenServiceImpl implements IAlmacenService {
 
     @Autowired
-    private AlmacenRepository repository;
+    private AlmacenRepository almacenRepository;
+
+    @Autowired
+    private CedeRepository cedeRepository;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
 
     @Override
     public List<Almacen> findAll() {
-        return repository.findAll();
+        return almacenRepository.findAll();
     }
 
     @Override
     public Optional<Almacen> findById(Long id) {
-        return repository.findById(id);
+        return almacenRepository.findById(id);
     }
 
+    // ...existing code...
     @Override
     public Almacen save(Almacen almacen) {
-        if (almacen.getCede() != null && almacen.getCede().getClave() != null) {
-            String clave = almacen.getCede().getClave() + "-A" + System.currentTimeMillis() % 10000;
-            almacen.setClave(clave);
+        Cede cede = cedeRepository.findById(almacen.getCede().getId())
+                .orElseThrow(() -> new RuntimeException("Cede no encontrada"));
+
+        Cliente cliente = null;
+        if (almacen.getCliente() != null && almacen.getCliente().getId() != null) {
+            cliente = clienteRepository.findById(almacen.getCliente().getId())
+                    .orElse(null);
         }
+
+        almacen.setCede(cede);
+        almacen.setCliente(cliente); // <-- Aquí se asigna el cliente recuperado
         almacen.setFechaRegistro(LocalDate.now());
-        return repository.save(almacen);
+        Almacen almacenGuardado = almacenRepository.save(almacen);
+        String clave = cede.getClave() + "-A" + almacenGuardado.getId();
+        almacenGuardado.setClave(clave);
+        return almacenRepository.save(almacenGuardado);
     }
+    // ...existing code...
 
     @Override
     public Almacen update(Long id, Almacen almacen) {
-        if (!repository.existsById(id))
+        if (!almacenRepository.existsById(id))
             return null;
+
         almacen.setId(id);
-        return repository.save(almacen);
+        return almacenRepository.save(almacen);
     }
 
     @Override
     public boolean delete(Long id) {
-        if (!repository.existsById(id))
+        if (!almacenRepository.existsById(id))
             return false;
-        repository.deleteById(id);
+        almacenRepository.deleteById(id);
         return true;
     }
 }
