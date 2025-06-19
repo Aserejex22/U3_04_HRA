@@ -12,15 +12,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("ADMIN", "USER")
-                .requestMatchers("/api/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .httpBasic(Customizer.withDefaults()) // <- en lugar de .httpBasic()
-            .csrf(csrf -> csrf.disable())         // <- nueva forma para desactivar CSRF
-            .build();
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
+                        .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
+                        .anyRequest().authenticated())
+                .httpBasic(Customizer.withDefaults()); // ← Forma recomendada
+
+        return http.build();
     }
+
 }
